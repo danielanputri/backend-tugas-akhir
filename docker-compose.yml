@@ -30,3 +30,24 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: reverse-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    deploy:
+      resources:
+        limits:
+          cpus: '0.15'
+          memory: 100M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
