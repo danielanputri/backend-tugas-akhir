@@ -6,8 +6,9 @@ services:
       dockerfile: Dockerfile
     container_name: backend-api
     restart: unless-stopped # Otomatis restart jika app crash atau VPS restart
-    ports:
-      - "8000:8000"
+    # Port 8000 TIDAK di-expose ke publik, hanya bisa diakses via nginx di jaringan internal
+    expose:
+      - "8000"
     env_file:
       - .env
     volumes:
@@ -15,16 +16,17 @@ services:
       # model AI yang sudah ditraining dan data upload tidak hilang.
       - ./app/ml_models:/app/app/ml_models
       - ./data/uploads:/app/data/uploads
+    networks:
+      - backend-net
     deploy:
       resources:
         limits:
           # Limit krusial untuk VPS 1 Core 1GB RAM:
           # Mencegah container menggunakan 100% CPU yang bikin server VPS nge-hang (SSH gak bisa masuk).
-          cpus: '0.85'  # Sisakan 15% core untuk OS server
+          cpus: '0.80'  # Sisakan ~20% untuk OS + nginx
           # Mencegah container OOM (Out of Memory) dan membuat VPS mati total.
-          memory: 850M  # Sisakan ~150MB untuk OS server
+          memory: 800M  # Sisakan ~200MB untuk OS + nginx
     logging:
-      # Batasi ukuran log agar tidak memakan memori disk VPS yang biasanya terbatas (misal 20GB)
       driver: "json-file"
       options:
         max-size: "10m"
@@ -34,19 +36,25 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-    container_name: reverse-proxy
+    container_name: backend-nginx
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "80:80"   # HTTP - publik
     depends_on:
-      - api
+      - api       # Pastikan api sudah jalan sebelum nginx start
+    networks:
+      - backend-net
     deploy:
       resources:
         limits:
-          cpus: '0.15'
-          memory: 100M
+          cpus: '0.10'
+          memory: 50M   # Nginx Alpine sangat ringan
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "5m"
+        max-file: "2"
+
+networks:
+  backend-net:
+    driver: bridge  # Jaringan internal antar container
