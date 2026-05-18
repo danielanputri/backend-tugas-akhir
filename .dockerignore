@@ -1,0 +1,17 @@
+.git
+.gitignore
+.env
+.venv
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+data/uploads/*
+app/ml_models/*.pkl
+app/ml_models/*.json
+!app/ml_models/registry.json
+.vscode/
+.idea/

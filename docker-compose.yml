@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend-api
+    restart: unless-stopped # Otomatis restart jika app crash atau VPS restart
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # Mapping folder ini penting agar saat container update/restart, 
+      # model AI yang sudah ditraining dan data upload tidak hilang.
+      - ./app/ml_models:/app/app/ml_models
+      - ./data/uploads:/app/data/uploads
+    deploy:
+      resources:
+        limits:
+          # Limit krusial untuk VPS 1 Core 1GB RAM:
+          # Mencegah container menggunakan 100% CPU yang bikin server VPS nge-hang (SSH gak bisa masuk).
+          cpus: '0.85'  # Sisakan 15% core untuk OS server
+          # Mencegah container OOM (Out of Memory) dan membuat VPS mati total.
+          memory: 850M  # Sisakan ~150MB untuk OS server
+    logging:
+      # Batasi ukuran log agar tidak memakan memori disk VPS yang biasanya terbatas (misal 20GB)
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

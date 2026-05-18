@@ -1,0 +1,17 @@
+{
+  "models": {
+    "model_8992003170403_20260310_044848": {
+      "id": "model_8992003170403_20260310_044848",
+      "product_code": "8992003170403",
+      "data_source": "20260310_044521_javas_tripta_mandala.csv",
+      "order": {
+        "p": 2,
+        "d": 0,
+        "q": 1
+      },
+      "rmse": 3.288,
+      "training_date": "2026-03-10 04:48:49",
+      "n_observations": 72
+    }
+  }
+}
